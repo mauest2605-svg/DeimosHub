@@ -62,6 +62,7 @@ let previewProduct;
 let selectedCategory = 'Accesorios';
 let editingProduct;
 let isAdmin = false;
+const quantities = new Map();
 const proteinVariants = {
   whey: { name: 'Whey Protein Clásica', image: 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?auto=format&fit=crop&w=900&q=85', description: 'Proteína de suero de leche para apoyar la recuperación y el crecimiento muscular.', specs: '24 g de proteína · Ideal después de entrenar' },
   isolate: { name: 'Whey Isolate Premium', image: 'https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?auto=format&fit=crop&w=900&q=85', description: 'Aislado de proteína de rápida absorción, ligero y bajo en grasas.', specs: '27 g de proteína · Alta pureza · Fácil digestión' },
@@ -69,18 +70,18 @@ const proteinVariants = {
   gainer: { name: 'Mass Gainer', image: 'https://images.unsplash.com/photo-1579722821273-0f6c7d44362f?auto=format&fit=crop&w=900&q=85', description: 'Fórmula alta en calorías para apoyar el aumento de masa y energía.', specs: '35 g de proteína · Alto aporte energético' }
 };
 const localProductImages = [
-  { match: /maono\s*pd200x/i, image: 'Micrófono Dinámico Maono PD200X USB y XLR.webp' },
-  { match: /qfun\s*hk2/i, image: 'Micrófono USB Qfun HK2 para PC Gamer con RGB.webp' },
-  { match: /krios/i, image: 'Audifonos Inalambricos Bluetooth Diadema Audífonos Gamer Krios H2 Con Microfono 650 Mah Luz Plegable Aux 3.5mm Para Xbox Pc Ps4.webp' },
-  { match: /occ[ií]am\s*gm06/i, image: 'Audífonos Gamer In-Ear Occiam GM06 con Cancelación de Ruido.webp' },
-  { match: /inphic\s*a1/i, image: 'Ratón Inalámbrico Gamer Bluetooth Recargable Negro Conexión USB-C 3 DPI Inphic A1.webp' },
-  { match: /ajazz\s*aj139/i, image: 'Mouse Gamer Inalámbrico Ajazz AJ139V2 MC PAW3311 12000 DPI Bluetooth.webp' },
-  { match: /aula.*f75|teclado.*f75/i, image: 'Teclado Mecanico Aula F75.webp' },
-  { match: /rgb.*mouse\s*pad|mouse\s*pad.*luz\s*rgb/i, image: 'Mouse Pad Gamer Grande 80x30cm Luz Rgb Alfombrilla De Ratón.webp' }
+  { match: /maono\s*pd200x/i, image: './Micrófono Dinámico Maono PD200X USB y XLR.webp' },
+  { match: /qfun\s*hk2/i, image: './Micrófono USB Qfun HK2 para PC Gamer con RGB.webp' },
+  { match: /krios/i, image: './Audifonos Inalambricos Bluetooth Diadema Audífonos Gamer Krios H2 Con Microfono 650 Mah Luz Plegable Aux 3.5mm Para Xbox Pc Ps4.webp' },
+  { match: /occ[ií]am\s*gm06/i, image: './Audífonos Gamer In-Ear Occiam GM06 con Cancelación de Ruido.webp' },
+  { match: /inphic\s*a1/i, image: './Ratón Inalámbrico Gamer Bluetooth Recargable Negro Conexión USB-C 3 DPI Inphic A1.webp' },
+  { match: /ajazz\s*aj139/i, image: './Mouse Gamer Inalámbrico Ajazz AJ139V2 MC PAW3311 12000 DPI Bluetooth.webp' },
+  { match: /aula.*f75|teclado.*f75/i, image: './Teclado Mecanico Aula F75.webp' },
+  { match: /rgb.*mouse\s*pad|mouse\s*pad.*luz\s*rgb/i, image: './Mouse Pad Gamer Grande 80x30cm Luz Rgb Alfombrilla De Ratón.webp' }
 ];
 const mousepadColors = [
-  { id: 'color-white', color: 'Blanco', name: 'Mouse Pad 800x300 Blanco', image: 'Mouse Pad Impermeable 800x300 + 3 Bridas color blanco.webp', description: 'Mouse pad blanco con diseño de líneas topográficas y tres bridas organizadoras.' },
-  { id: 'color-black', color: 'Negro', name: 'Mouse Pad 800x300 Negro', image: 'Mouse Pad Impermeable 800x300 + 3 Bridas color negro.webp', description: 'Mouse pad negro con diseño de líneas topográficas y tres bridas organizadoras.' }
+  { id: 'color-white', color: 'Blanco', name: 'Mouse Pad 800x300 Blanco', image: './Mouse Pad Impermeable 800x300 + 3 Bridas color blanco.webp', description: 'Mouse pad blanco con diseño de líneas topográficas y tres bridas organizadoras.' },
+  { id: 'color-black', color: 'Negro', name: 'Mouse Pad 800x300 Negro', image: './Mouse Pad Impermeable 800x300 + 3 Bridas color negro.webp', description: 'Mouse pad negro con diseño de líneas topográficas y tres bridas organizadoras.' }
 ];
 let products = loadProducts();
 function normalizeProductImages(catalog) {
@@ -159,7 +160,7 @@ function renderProducts() {
     <article class="product-card" data-product="${product.id}">
       <img class="product-image" src="${product.image || 'deimos-logo.png'}" alt="${product.name}" loading="lazy" onerror="this.onerror=null;this.src='deimos-logo.png';">
       ${isAdmin ? `<button class="delete-button admin-only" type="button" data-delete="${product.id}" aria-label="Eliminar ${product.name}">×</button>` : ''}
-      <div class="product-body"><h3>${product.name}</h3><p class="product-description">${product.description}</p><button class="description-toggle" type="button" data-description="${product.id}">↘ Ver descripción completa</button><div class="product-meta"><span class="price">${formatPrice(product.price)}</span>${isAdmin ? `<button class="edit-button admin-only" type="button" data-edit="${product.id}" aria-label="Editar ${product.name}">✎</button>` : ''}<button class="order-button" type="button" data-order="${product.id}">Pedir por WhatsApp ↗</button></div></div>
+      <div class="product-body"><h3>${product.name}</h3><p class="product-description">${product.description}</p><button class="description-toggle" type="button" data-description="${product.id}">↘ Ver descripción completa</button><div class="product-meta"><span class="price">${formatPrice(product.price)}</span><div class="purchase-controls"><div class="quantity-control" aria-label="Cantidad de ${product.name}"><button type="button" data-quantity="${product.id}" data-change="-1" aria-label="Reducir cantidad">−</button><span data-quantity-value="${product.id}">${quantities.get(product.id) || 1}</span><button type="button" data-quantity="${product.id}" data-change="1" aria-label="Aumentar cantidad">+</button></div>${isAdmin ? `<button class="edit-button admin-only" type="button" data-edit="${product.id}" aria-label="Editar ${product.name}">✎</button>` : ''}<button class="order-button" type="button" data-order="${product.id}">Pedir por WhatsApp ↗</button></div></div></div>
     </article>`).join('');
   productCount.textContent = `${visibleProducts.length} ${visibleProducts.length === 1 ? 'producto' : 'productos'}`;
   supplementsMessage.hidden = selectedCategory !== 'Suplementos';
@@ -209,9 +210,9 @@ function updateProteinPreview() {
   previewImage.src = isProtein ? variant.image : (color?.image || previewProduct.image || 'deimos-logo.png');
   previewImage.alt = name;
 }
-function orderProduct(product) {
+function orderProduct(product, quantity = 1) {
   pendingProduct = product;
-  selectedProduct.textContent = `Producto seleccionado: ${product.name} · ${formatPrice(product.price)}`;
+  selectedProduct.textContent = `Producto seleccionado: ${product.name} · ${quantity} unidad${quantity === 1 ? '' : 'es'} · ${formatPrice(product.price * quantity)}`;
   let seconds = 10;
   agreeButton.disabled = true;
   countdown.textContent = `Podrás aceptar en ${seconds} segundos`;
@@ -232,7 +233,8 @@ function openWhatsApp(product) {
   const protein = getCategory(product) === 'Suplementos' ? getProteinVariants(product)[product.proteinType || Object.keys(getProteinVariants(product))[0]] : null;
   const color = Array.isArray(product.colorVariants) ? product.colorVariants.find((item) => item.id === product.colorType) : null;
   const productName = protein ? protein.name : (color?.name || product.name);
-  const message = `Hola, quiero pedir el producto «${productName}» por ${formatPrice(product.price)}.`;
+  const quantity = quantities.get(product.id) || 1;
+  const message = `Hola, quiero pedir ${quantity} unidad${quantity === 1 ? '' : 'es'} del producto «${productName}» por ${formatPrice(product.price * quantity)}.`;
   window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank', 'noopener');
 }
 
@@ -259,6 +261,13 @@ document.getElementById('addFlavorButton').addEventListener('click', () => { con
 flavorRows.addEventListener('click', (event) => { if (event.target.classList.contains('remove-flavor')) { event.target.closest('.flavor-row').remove(); } });
 document.getElementById('addColorButton').addEventListener('click', () => { const variants = collectColorVariants(); variants.push({}); renderColorRows(variants); });
 colorRows.addEventListener('click', (event) => { if (event.target.classList.contains('remove-color')) { event.target.closest('.flavor-row').remove(); } });
+document.getElementById('imageFileInput').addEventListener('change', (event) => {
+  const file = event.target.files[0];
+  const imagePreview = document.getElementById('imageEditPreview');
+  if (!file) return;
+  imagePreview.src = URL.createObjectURL(file);
+  imagePreview.hidden = false;
+});
 document.querySelectorAll('[value="cancel"]').forEach((button) => button.addEventListener('click', () => dialog.close()));
 document.getElementById('closeRules').addEventListener('click', () => { clearInterval(rulesTimer); rulesDialog.close(); });
 agreeButton.addEventListener('click', () => { rulesDialog.close(); openWhatsApp(pendingProduct); pendingProduct = null; });
@@ -278,7 +287,7 @@ document.getElementById('saveVideoButton').addEventListener('click', () => {
   products = products.map((product) => product.id === previewProduct.id ? previewProduct : product);
   saveProducts(); renderVideo(url); videoEditor.hidden = true; showToast('Video añadido a la vista previa.');
 });
-previewOrder.addEventListener('click', () => { previewDialog.close(); orderProduct(previewProduct); });
+previewOrder.addEventListener('click', () => { previewDialog.close(); orderProduct(previewProduct, quantities.get(previewProduct.id) || 1); });
 productForm.addEventListener('submit', (event) => {
   event.preventDefault();
   if (event.submitter?.value === 'cancel') { dialog.close(); return; }
@@ -286,9 +295,9 @@ productForm.addEventListener('submit', (event) => {
   const imageFile = document.getElementById('imageFileInput').files[0];
   const saveProduct = (image) => {
     const enteredPrice = document.getElementById('priceInput').value.trim();
-    const product = { id: Date.now(), name: document.getElementById('nameInput').value.trim(), description: document.getElementById('descriptionInput').value.trim(), category: document.getElementById('categoryInput').value, proteinVariants: categoryInput.value === 'Suplementos' ? collectProteinVariants() : (editingProduct?.proteinVariants || []), colorVariants: isMousepad(document.getElementById('nameInput').value) ? collectColorVariants() : (editingProduct?.colorVariants || []), price: enteredPrice === '' ? editingProduct?.price : Number(enteredPrice), image, video: document.getElementById('videoInput').value.trim() };
+    const product = { id: Date.now(), name: document.getElementById('nameInput').value.trim(), description: document.getElementById('descriptionInput').value.trim(), category: document.getElementById('categoryInput').value, proteinVariants: categoryInput.value === 'Suplementos' ? collectProteinVariants() : (editingProduct?.proteinVariants || []), colorVariants: isMousepad(document.getElementById('nameInput').value) ? collectColorVariants() : (editingProduct?.colorVariants || []), price: enteredPrice === '' ? editingProduct?.price : Number(enteredPrice), image: image || editingProduct?.image || document.getElementById('imageInput').value.trim(), video: document.getElementById('videoInput').value.trim() || editingProduct?.video || '' };
     if (editingProduct) {
-      products = products.map((item) => item.id === editingProduct.id ? { ...editingProduct, ...product, id: editingProduct.id, image: image || editingProduct.image, video: product.video || editingProduct.video } : item);
+      products = products.map((item) => item.id === editingProduct.id ? { ...editingProduct, ...product, id: editingProduct.id } : item);
       showToast('Producto actualizado.');
     } else {
       products.unshift(product);
@@ -307,8 +316,18 @@ productGrid.addEventListener('click', (event) => {
   const deleteId = event.target.dataset.delete;
   const editId = event.target.dataset.edit;
   const descriptionId = event.target.dataset.description;
+  const quantityId = event.target.dataset.quantity;
   const productCard = event.target.closest('.product-card');
-  if (orderId) orderProduct(products.find((product) => product.id === Number(orderId)));
+  if (quantityId) {
+    const productId = Number(quantityId);
+    const nextQuantity = Math.max(1, (quantities.get(productId) || 1) + Number(event.target.dataset.change));
+    quantities.set(productId, nextQuantity);
+    const quantityValue = productCard.querySelector(`[data-quantity-value="${productId}"]`);
+    if (quantityValue) quantityValue.textContent = nextQuantity;
+    event.stopPropagation();
+    return;
+  }
+  if (orderId) orderProduct(products.find((product) => product.id === Number(orderId)), quantities.get(Number(orderId)) || 1);
   if (descriptionId) {
     const description = event.target.previousElementSibling;
     const expanded = description.classList.toggle('expanded');
@@ -326,6 +345,9 @@ productGrid.addEventListener('click', (event) => {
     renderColorRows(editingProduct.colorVariants || []);
     toggleProductVariantEditors();
     document.getElementById('imageInput').value = editingProduct.image?.startsWith('data:') ? '' : editingProduct.image || '';
+    const imagePreview = document.getElementById('imageEditPreview');
+    imagePreview.src = editingProduct.image || '';
+    imagePreview.hidden = !editingProduct.image;
     document.getElementById('videoInput').value = editingProduct.video || '';
     document.getElementById('imageFileInput').value = '';
     dialog.showModal();
